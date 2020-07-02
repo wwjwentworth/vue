@@ -1,5 +1,13 @@
 /* @flow */
 
+/*
+ * @Author: 吴文洁
+ * @Date: 2020-06-30 17:53:29
+ * @LastEditors: 吴文洁
+ * @LastEditTime: 2020-06-30 18:32:50
+ * @Description: 
+ */ 
+
 import config from '../config'
 import { initUse } from './use'
 import { initMixin } from './mixin'
@@ -19,9 +27,11 @@ import {
 } from '../util/index'
 
 export function initGlobalAPI (Vue: GlobalAPI) {
-  // config
+  // 定一个configDef对象
   const configDef = {}
+  // 使用configDef对象的时候会返回config对象
   configDef.get = () => config
+  // 在非生产环境中，不允许对configDef对象进行更改
   if (process.env.NODE_ENV !== 'production') {
     configDef.set = () => {
       warn(
@@ -29,11 +39,11 @@ export function initGlobalAPI (Vue: GlobalAPI) {
       )
     }
   }
+
+  // 在Vue实例上挂载一个config属性，值为configDef
   Object.defineProperty(Vue, 'config', configDef)
 
-  // exposed util methods.
-  // NOTE: these are not considered part of the public API - avoid relying on
-  // them unless you are aware of the risk.
+  // 这些工具方法不视作全局API的一部分，除非你已经意识到某些风险，否则不要去依赖他们
   Vue.util = {
     warn,
     extend,
@@ -41,6 +51,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     defineReactive
   }
 
+  // 这里定义一些全局属性
   Vue.set = set
   Vue.delete = del
   Vue.nextTick = nextTick
@@ -52,6 +63,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   }
 
   Vue.options = Object.create(null)
+  // 这里定义全局的component，directive，filter属性
   ASSET_TYPES.forEach(type => {
     Vue.options[type + 's'] = Object.create(null)
   })

@@ -1,25 +1,31 @@
 /* @flow */
+/*
+ * @Author: 吴文洁
+ * @Date: 2020-06-30 17:53:29
+ * @LastEditors: 吴文洁
+ * @LastEditTime: 2020-07-02 11:42:10
+ * @Description: 
+ * @Copyrigh: © 2020 杭州杰竞科技有限公司 版权所有
+ */ 
+
 
 import { ASSET_TYPES } from 'shared/constants'
 import { defineComputed, proxy } from '../instance/state'
 import { extend, mergeOptions, validateComponentName } from '../util/index'
 
 export function initExtend (Vue: GlobalAPI) {
-  /**
-   * Each instance constructor, including Vue, has a unique
-   * cid. This enables us to create wrapped "child
-   * constructors" for prototypal inheritance and cache them.
-   */
   Vue.cid = 0
   let cid = 1
 
-  /**
-   * Class inheritance
-   */
+  // 在Vue对象上增加extends方法
   Vue.extend = function (extendOptions: Object): Function {
+    // 使用Vue.extend时传入的options或者父类
     extendOptions = extendOptions || {}
+    // 声明Super常量，并指向Vue对象
     const Super = this
+
     const SuperId = Super.cid
+    // 如果传入的是父类，那么
     const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
     if (cachedCtors[SuperId]) {
       return cachedCtors[SuperId]
@@ -33,8 +39,11 @@ export function initExtend (Vue: GlobalAPI) {
     const Sub = function VueComponent (options) {
       this._init(options)
     }
+
+    // JS继承
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
+    
     Sub.cid = cid++
     Sub.options = mergeOptions(
       Super.options,

@@ -39,10 +39,9 @@ if (inBrowser) {
 let _isServer
 export const isServerRendering = () => {
   if (_isServer === undefined) {
-    /* istanbul ignore if */
+    // 如果运行环境不是在浏览器中，且global对象不为空
     if (!inBrowser && !inWeex && typeof global !== 'undefined') {
-      // detect presence of vue-server-renderer and avoid
-      // Webpack shimming the process
+      // 如果global对象的process属性存在且webpack注入的env为server，那么运行环境就是服务端
       _isServer = global['process'] && global['process'].env.VUE_ENV === 'server'
     } else {
       _isServer = false

@@ -1,3 +1,11 @@
+/*
+ * @Author: 吴文洁
+ * @Date: 2020-06-30 17:53:29
+ * @LastEditors: 吴文洁
+ * @LastEditTime: 2020-06-30 18:24:48
+ * @Description: 
+ */
+
 import { initMixin } from './init'
 import { stateMixin } from './state'
 import { renderMixin } from './render'
