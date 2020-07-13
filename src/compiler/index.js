@@ -1,3 +1,11 @@
+/*
+ * @Author: 吴文洁
+ * @Date: 2020-06-30 17:53:29
+ * @LastEditors: 吴文洁
+ * @LastEditTime: 2020-07-13 10:32:05
+ * @Description: 
+ * @Copyright: © 2020 杭州杰竞科技有限公司 版权所有
+ */ 
 /* @flow */
 
 import { parse } from './parser/index'
@@ -5,9 +13,7 @@ import { optimize } from './optimizer'
 import { generate } from './codegen/index'
 import { createCompilerCreator } from './create-compiler'
 
-// `createCompilerCreator` allows creating compilers that use alternative
-// parser/optimizer/codegen, e.g the SSR optimizing compiler.
-// Here we just export a default compiler using the default parts.
+// createCompiler函数主要通过三个步骤，parse、optimize、generate来生成一个包含ast、render和staticRenderFns的对象
 export const createCompiler = createCompilerCreator(function baseCompile (
   template: string,
   options: CompilerOptions

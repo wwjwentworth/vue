@@ -58,26 +58,35 @@ export function parseHTML (html, options) {
   const canBeLeftOpenTag = options.canBeLeftOpenTag || no
   let index = 0
   let last, lastTag
-  while (html) {
-    last = html
-    // Make sure we're not in a plaintext content element like script/style
-    if (!lastTag || !isPlainTextElement(lastTag)) {
-      let textEnd = html.indexOf('<')
-      if (textEnd === 0) {
-        // Comment:
-        if (comment.test(html)) {
-          const commentEnd = html.indexOf('-->')
 
+  while (html) {
+    // 保存上一次处理的html
+    last = html
+    // 确保父级节点不是script,style,textarea
+    if (!lastTag || !isPlainTextElement(lastTag)) {
+      // 找到第一个'<'的位置
+      let textEnd = html.indexOf('<')
+      // 如果第一个字符是'<'
+      if (textEnd === 0) {
+        // 处理注释
+        if (comment.test(html)) {
+          // 拿到注释结尾的下标
+          const commentEnd = html.indexOf('-->')
+          // 如果注释存在
           if (commentEnd >= 0) {
+            // 如果需要保留注释的话
             if (options.shouldKeepComment) {
+              // 调用传进来的comment的方法
               options.comment(html.substring(4, commentEnd), index, index + commentEnd + 3)
             }
+            // advance方法就是截取字符串
             advance(commentEnd + 3)
             continue
           }
         }
 
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
+        // 如果是以'<!['字符开始的话，啥也不做，直接略过
         if (conditionalComment.test(html)) {
           const conditionalEnd = html.indexOf(']>')
 
@@ -88,16 +97,18 @@ export function parseHTML (html, options) {
         }
 
         // Doctype:
+        // 如果匹配到有文档类型相关的字符串  同样滤过
         const doctypeMatch = html.match(doctype)
         if (doctypeMatch) {
           advance(doctypeMatch[0].length)
           continue
         }
 
-        // End tag:
+        // 如果遇到结束标签
         const endTagMatch = html.match(endTag)
         if (endTagMatch) {
           const curIndex = index
+          // 截取掉结束标签
           advance(endTagMatch[0].length)
           parseEndTag(endTagMatch[1], curIndex, index)
           continue

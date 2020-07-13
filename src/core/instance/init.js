@@ -54,6 +54,7 @@ export function initMixin (Vue: Class<Component>) {
     callHook(vm, 'created')
 
     // vm的mount,挂载dom节点
+    // 如果Vue实例在实例化时没有收到el选项，则它处于未挂载状态，可以使用vm.$mount手动的挂载一个未挂载的实例。如果没有提供elementOrSelector参数，模版将渲染为文档之外的元素，并且你必须使用原生的DOM API将它插入到文档中
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }

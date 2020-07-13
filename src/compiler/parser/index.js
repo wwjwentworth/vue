@@ -73,32 +73,39 @@ export function createASTElement (
   }
 }
 
-/**
- * Convert HTML string to AST.
- */
+// 将HTML转化成AST
 export function parse (
   template: string,
   options: CompilerOptions
 ): ASTElement | void {
   warn = options.warn || baseWarn
 
+  // 判断是否是pre标签
   platformIsPreTag = options.isPreTag || no
+  // 用来检测一个属性在标签中是否需要使用元素对象原生的prop进行绑定
   platformMustUseProp = options.mustUseProp || no
+  // 如果是svg标签，返回svg字符，否则返回math字符
   platformGetTagNamespace = options.getTagNamespace || no
+  // 判断是否是html标签还是svg标签（判断是否是原生标签）
   const isReservedTag = options.isReservedTag || no
+  // 可能是组件
   maybeComponent = (el: ASTElement) => !!el.component || !isReservedTag(el.tag)
 
+  // 遍历modules数组中的transformNode方法，并保存在transforms中
   transforms = pluckModuleFunction(options.modules, 'transformNode')
+  // 同上遍历modules数组中的preTransformNode，并保存在preTransforms中
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
+  // 同上遍历modules数组中的postTransformNode，并保存在postTransforms
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
 
+  // 表示模板上包裹表达式的开始和结束字符，分别是{{ 和 }}
   delimiters = options.delimiters
 
   const stack = []
   const preserveWhitespace = options.preserveWhitespace !== false
   const whitespaceOption = options.whitespace
-  let root
-  let currentParent
+  let root           // 最终返回出去的AST树根节点
+  let currentParent  // 当前父节点
   let inVPre = false
   let inPre = false
   let warned = false
@@ -111,6 +118,7 @@ export function parse (
   }
 
   function closeElement (element) {
+    // 移除元素的空白节点
     trimEndingWhitespace(element)
     if (!inVPre && !element.processed) {
       element = processElement(element, options)
@@ -161,6 +169,8 @@ export function parse (
     if (element.pre) {
       inVPre = false
     }
+
+    // 判断element.tag是否是pre标签
     if (platformIsPreTag(element.tag)) {
       inPre = false
     }
@@ -171,7 +181,7 @@ export function parse (
   }
 
   function trimEndingWhitespace (el) {
-    // remove trailing whitespace node
+    // 移除空白节点
     if (!inPre) {
       let lastNode
       while (
@@ -210,6 +220,10 @@ export function parse (
     shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     outputSourceRange: options.outputSourceRange,
+    // 处理开始标签
+    // 确定命名空间；创建AST元素 element，执行预处理；定义root；处理各类 v- 标签的逻辑
+    // 最后更新 root、currentParent、stack 的结果
+    // 最终通过 createASTElement 方法定义了一个新的 AST 对象:
     start (tag, attrs, unary, start, end) {
       // check namespace.
       // inherit parent ns if there is one
@@ -220,7 +234,8 @@ export function parse (
       if (isIE && ns === 'svg') {
         attrs = guardIESVGBug(attrs)
       }
-
+      
+      // 创建基础的ASTElement
       let element: ASTElement = createASTElement(tag, attrs, currentParent)
       if (ns) {
         element.ns = ns
@@ -230,12 +245,14 @@ export function parse (
         if (options.outputSourceRange) {
           element.start = start
           element.end = end
+          // 将attrsList数组转化为  对象，key就是属性名称
           element.rawAttrsMap = element.attrsList.reduce((cumulated, attr) => {
             cumulated[attr.name] = attr
             return cumulated
           }, {})
         }
         attrs.forEach(attr => {
+          // 校验属性名称是否合法
           if (invalidAttributeRE.test(attr.name)) {
             warn(
               `Invalid dynamic argument expression: attribute names cannot contain ` +
@@ -249,6 +266,7 @@ export function parse (
         })
       }
 
+      // 如果是被禁止的标签   并且不是服务端渲染
       if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true
         process.env.NODE_ENV !== 'production' && warn(
@@ -259,29 +277,40 @@ export function parse (
         )
       }
 
-      // apply pre-transforms
+      // 调用preTransform 处理element 对象  默认就是options.mouduls传入的对象中的preTransform函数
       for (let i = 0; i < preTransforms.length; i++) {
+        // 默认情况下 这里主要在处理 input 元素
         element = preTransforms[i](element, options) || element
       }
 
+      
       if (!inVPre) {
+        // 判断是否有v-pre指令，如果有的话，那么element.pre = true
         processPre(element)
         if (element.pre) {
+          // 跳过这个元素和他自元素的编译过程，可以用来显示原始 Mustache 标签。跳过大量没有指令的节点会加快编译。
+          // 比如：<span v-pre>{{ this will not be compiled }}</span>
           inVPre = true
         }
       }
+      // 判断是否是pre标签
       if (platformIsPreTag(element.tag)) {
         inPre = true
       }
+      // 如果存在v-pre指令元素
       if (inVPre) {
+        // 只简单处理一下属性
         processRawAttrs(element)
       } else if (!element.processed) {
-        // structural directives
+        // 处理v-for
         processFor(element)
+        // 处理v-if
         processIf(element)
+        // 处理v-once
         processOnce(element)
       }
 
+      // 如果root为空的话，root就等于这个el
       if (!root) {
         root = element
         if (process.env.NODE_ENV !== 'production') {
@@ -289,6 +318,7 @@ export function parse (
         }
       }
 
+      // 如果不是无内容标签
       if (!unary) {
         currentParent = element
         stack.push(element)
@@ -297,6 +327,7 @@ export function parse (
       }
     },
 
+    // 处理结束标签
     end (tag, start, end) {
       const element = stack[stack.length - 1]
       // pop stack
@@ -308,6 +339,8 @@ export function parse (
       closeElement(element)
     },
 
+    // 主要就是处理文本节点，将文本转化为如下结构
+    // { type: 3, text: '3333' }
     chars (text: string, start: number, end: number) {
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production') {
@@ -405,6 +438,7 @@ function processPre (el) {
   }
 }
 
+// 
 function processRawAttrs (el) {
   const list = el.attrsList
   const len = list.length

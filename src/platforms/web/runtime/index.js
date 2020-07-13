@@ -1,3 +1,11 @@
+/*
+ * @Author: 吴文洁
+ * @Date: 2020-06-30 17:53:29
+ * @LastEditors: 吴文洁
+ * @LastEditTime: 2020-07-13 09:40:03
+ * @Description: 
+ * @Copyright: © 2020 杭州杰竞科技有限公司 版权所有
+ */ 
 /* @flow */
 
 import Vue from 'core/index'
@@ -39,6 +47,7 @@ Vue.prototype.$mount = function (
   hydrating?: boolean
 ): Component {
   el = el && inBrowser ? query(el) : undefined
+  // 没有经过compileToFunctions这样的过程，而是直接进行接下来的render -> Vnode 的过程
   return mountComponent(this, el, hydrating)
 }
 

@@ -144,6 +144,7 @@ export function mountComponent (
   hydrating?: boolean
 ): Component {
   vm.$el = el
+  // 如果不存在render函数，则直接创建一个空的VNode节点
   if (!vm.$options.render) {
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
@@ -164,6 +165,8 @@ export function mountComponent (
       }
     }
   }
+
+  // 检测完render之后，开始调用beforeMount钩子函数
   callHook(vm, 'beforeMount')
 
   let updateComponent
@@ -187,13 +190,12 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
+      // vm._render()方法返回一个VNode，作为vm._update的第一个参数
       vm._update(vm._render(), hydrating)
     }
   }
 
-  // we set this to vm._watcher inside the watcher's constructor
-  // since the watcher's initial patch may call $forceUpdate (e.g. inside child
-  // component's mounted hook), which relies on vm._watcher being already defined
+  // 定义Watcher，这里先说明以下收集依赖的过程：因为Vue数据里定义的Data并不是所有数据都是视图渲染所需要的。也就是说，我们需要哪些数据是视图渲染需要的，哪些数据不是视图渲染所需要的。在我们执行new Watcher(vm, updateComponent, noop, {})时候，首先会触发Watcher里面的get方法，同时设置Dep.target = watcher。get方法又会去执行传入的updateComponent（第二个参数expOrFn）,也就是会去做template -> AST -> render Function -> VNode -> patch Dom 这么一个过程。在这个过程中，获取读取我们绑定的数据，由于之前通过observe进行了数据劫持，这样会触发数据的get方法，此时会将Watcher添加到Dep中，当又数据更新是，便会触发dep.notify方法同通知Watcher更新，然后执行watcher的update方法，此时又会重新执行get updateComponent 方法，至此完成对视图的重新渲染。
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted && !vm._isDestroyed) {

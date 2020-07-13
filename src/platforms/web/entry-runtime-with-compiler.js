@@ -14,6 +14,7 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
+// 此处的mount为运行时的mount
 const mount = Vue.prototype.$mount
 Vue.prototype.$mount = function (
   el?: string | Element,
@@ -30,11 +31,11 @@ Vue.prototype.$mount = function (
   }
 
   const options = this.$options
-  // resolve template/el and convert to render function
   if (!options.render) {
     let template = options.template
     if (template) {
       if (typeof template === 'string') {
+        // 如果template的类型是字符串，且第一个字符是#，说明template是某个Dom的id类名，则将template转化成该Dom节点的innerHTML
         if (template.charAt(0) === '#') {
           template = idToTemplate(template)
           /* istanbul ignore if */
@@ -46,14 +47,17 @@ Vue.prototype.$mount = function (
           }
         }
       } else if (template.nodeType) {
+        // 如果template已经是Dom节点了，则直接返回该Dom节点的innerHTML
         template = template.innerHTML
       } else {
+        // 如果上述两个条件都不满足的话，则将template视为无效值
         if (process.env.NODE_ENV !== 'production') {
           warn('invalid template option:' + template, this)
         }
         return this
       }
     } else if (el) {
+      // 如果el存在的话，则返回el的outerHTML
       template = getOuterHTML(el)
     }
     if (template) {
@@ -61,7 +65,8 @@ Vue.prototype.$mount = function (
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile')
       }
-
+      
+      // 如果不存在render函数，则会将模版转化成render函数
       const { render, staticRenderFns } = compileToFunctions(template, {
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,
