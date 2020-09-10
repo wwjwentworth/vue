@@ -22,10 +22,9 @@ let waiting = false
 let flushing = false
 let index = 0
 
-/**
- * Reset the scheduler's state.
- */
+// 状态恢复，将控制流程状态的变量恢复到初始值，将队列情况
 function resetSchedulerState () {
+  // 将队列的length设置为0就是清空队列
   index = queue.length = activatedChildren.length = 0
   has = {}
   if (process.env.NODE_ENV !== 'production') {
@@ -34,22 +33,12 @@ function resetSchedulerState () {
   waiting = flushing = false
 }
 
-// Async edge case #6566 requires saving the timestamp when event listeners are
-// attached. However, calling performance.now() has a perf overhead especially
-// if the page has thousands of event listeners. Instead, we take a timestamp
-// every time the scheduler flushes and use that for all event listeners
-// attached during that flush.
+
 export let currentFlushTimestamp = 0
 
-// Async edge case fix requires storing an event listener's attach timestamp.
 let getNow: () => number = Date.now
 
-// Determine what event timestamp the browser is using. Annoyingly, the
-// timestamp can either be hi-res (relative to page load) or low-res
-// (relative to UNIX epoch), so in order to compare time we have to use the
-// same timestamp type when saving the flush timestamp.
-// All IE versions use low-res event timestamps, and have problematic clock
-// implementations (#9632)
+// 判读是否是在非IE的浏览器环境中
 if (inBrowser && !isIE) {
   const performance = window.performance
   if (
@@ -57,43 +46,36 @@ if (inBrowser && !isIE) {
     typeof performance.now === 'function' &&
     getNow() > document.createEvent('Event').timeStamp
   ) {
-    // if the event timestamp, although evaluated AFTER the Date.now(), is
-    // smaller than it, it means the event is using a hi-res timestamp,
-    // and we need to use the hi-res version for event listener timestamps as
-    // well.
     getNow = () => performance.now()
   }
 }
 
-/**
- * Flush both queues and run the watchers.
- */
+// 刷新队列并执行watcher
 function flushSchedulerQueue () {
+  // 获取当前时间戳
   currentFlushTimestamp = getNow()
   flushing = true
   let watcher, id
 
-  // Sort queue before flush.
-  // This ensures that:
-  // 1. Components are updated from parent to child. (because parent is always
-  //    created before the child)
-  // 2. A component's user watchers are run before its render watcher (because
-  //    user watchers are created before the render watcher)
-  // 3. If a component is destroyed during a parent component's watcher run,
-  //    its watchers can be skipped.
+  // 刷新之前进行队列排序，排序主要是确保以下三件事情
+  // 1. 组件的更新由父到子，因为父组件是先于子组件创建的，所以Watcher的执行也是先执行父组件的，再执行子组件的
+  // 2. 用户自定义的watchers优先于渲染watchers执行，因为用户自定义的watchers是在渲染watchers之前创建的
+  // 3. 如果子组件在父组件的watcher执行期间被销毁，那么子组件watchers的执行都可以被跳过
+  
+  // 根据ID大小排序
   queue.sort((a, b) => a.id - b.id)
 
-  // do not cache length because more watchers might be pushed
-  // as we run existing watchers
+  // 不用缓存queue队列的长度，因为在watcher执行期间可能会有其他的watcher被创建
   for (index = 0; index < queue.length; index++) {
     watcher = queue[index]
+    // 如果watcher有before方法，则执行该watcher的before方法
     if (watcher.before) {
       watcher.before()
     }
     id = watcher.id
     has[id] = null
+    // 执行watcher
     watcher.run()
-    // in dev build, check and stop circular updates.
     if (process.env.NODE_ENV !== 'production' && has[id] != null) {
       circular[id] = (circular[id] || 0) + 1
       if (circular[id] > MAX_UPDATE_COUNT) {
@@ -138,13 +120,8 @@ function callUpdatedHooks (queue) {
   }
 }
 
-/**
- * Queue a kept-alive component that was activated during patch.
- * The queue will be processed after the entire tree has been patched.
- */
+
 export function queueActivatedComponent (vm: Component) {
-  // setting _inactive to false here so that a render function can
-  // rely on checking whether it's in an inactive tree (e.g. router-view)
   vm._inactive = false
   activatedChildren.push(vm)
 }
@@ -156,11 +133,6 @@ function callActivatedHooks (queue) {
   }
 }
 
-/**
- * Push a watcher into the watcher queue.
- * Jobs with duplicate IDs will be skipped unless it's
- * pushed when the queue is being flushed.
- */
 export function queueWatcher (watcher: Watcher) {
   const id = watcher.id
   if (has[id] == null) {
@@ -168,15 +140,15 @@ export function queueWatcher (watcher: Watcher) {
     if (!flushing) {
       queue.push(watcher)
     } else {
-      // if already flushing, splice the watcher based on its id
-      // if already past its id, it will be run next immediately.
+      // 插入watcher
+      // 插入的位置：第一个 待插入watcher的id大于当前队列中的watcher的id
       let i = queue.length - 1
       while (i > index && queue[i].id > watcher.id) {
         i--
       }
       queue.splice(i + 1, 0, watcher)
     }
-    // queue the flush
+
     if (!waiting) {
       waiting = true
 

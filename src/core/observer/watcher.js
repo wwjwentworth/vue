@@ -152,6 +152,8 @@ export default class Watcher {
 
   // 清空依赖
   cleanupDeps () {
+    // deps：旧的依赖
+    // newDeps：新的依赖
     let i = this.deps.length
     while (i--) {
       const dep = this.deps[i]
@@ -206,7 +208,7 @@ export default class Watcher {
           try {
             this.cb.call(this.vm, value, oldValue)
           } catch (e) {
-            // // 回调函数在执行的过程中其行为是不可预知, 出现错误给出提示
+            // 回调函数在执行的过程中其行为是不可预知, 出现错误给出提示
             handleError(e, this.vm, `callback for watcher "${this.expression}"`)
           }
         } else {
