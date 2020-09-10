@@ -24,24 +24,33 @@ export function validateProp (
   propsData: Object,
   vm?: Component
 ): any {
+  // 属性
   const prop = propOptions[key]
+  // 判断父组件有没有传递这个值
   const absent = !hasOwn(propsData, key)
+  // 父组件传递的属性的值
   let value = propsData[key]
-  // boolean casting
+  // 判断是否是boolean类型的值
   const booleanIndex = getTypeIndex(Boolean, prop.type)
+
+  // 处理Boolean类型的数据
   if (booleanIndex > -1) {
+    // 如果父组件没有传递这个prop数据，且没有设置default属性，则属性值为false
     if (absent && !hasOwn(prop, 'default')) {
       value = false
     } else if (value === '' || value === hyphenate(key)) {
-      // only cast empty string / same name to boolean if
-      // boolean has higher priority
+      // 如果父组件传递的值为空或者value值为key值的驼峰写法，则先取获取String类型的索引，然后判断 stringIndex < 0 || booleanIndex < stringIndex 的值来决定 value 的值是否为 true
+
+      // 获取String类型的索引
       const stringIndex = getTypeIndex(String, prop.type)
+      // 如果没有String类型的索引，或者Boolean类型的索引在String类型的索引前面，则属性则为true
       if (stringIndex < 0 || booleanIndex < stringIndex) {
         value = true
       }
     }
   }
-  // check default value
+  // 处理默认数据
+  // 如果value为undefined，表示父组件没有传递这个属性值，那么就需要通过getPropDefaultValue来获取默认值
   if (value === undefined) {
     value = getPropDefaultValue(vm, prop, key)
     // since the default value is a fresh copy,
@@ -51,6 +60,8 @@ export function validateProp (
     observe(value)
     toggleObserving(prevShouldObserve)
   }
+
+  // 断言
   if (
     process.env.NODE_ENV !== 'production' &&
     // skip validation for weex recycle-list child component props
@@ -62,15 +73,16 @@ export function validateProp (
 }
 
 /**
- * Get the default value of a prop.
+ * 获取一个属性的默认值
  */
 function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): any {
-  // no default, return undefined
+  // 如果没有设置default属性，则直接返回undefined
+  // 除了Boolean类型的数据，没有设置default属性会返回false，其余数据都返回undefined
   if (!hasOwn(prop, 'default')) {
     return undefined
   }
   const def = prop.default
-  // warn against non-factory defaults for Object & Array
+  // 如果默认值是数组/对象类型，则警告，因为数组/对象类型的默认值需要用一个函数返回
   if (process.env.NODE_ENV !== 'production' && isObject(def)) {
     warn(
       'Invalid default value for prop "' + key + '": ' +
@@ -79,16 +91,16 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
       vm
     )
   }
-  // the raw prop value was also undefined from previous render,
-  // return previous default value to avoid unnecessary watcher trigger
+  
+  // 如果上一次组件渲染，父组件传递的porp的值是undefined，那么就直接返回上一次的默认值，这样可以避免不必要的watcher更新
   if (vm && vm.$options.propsData &&
     vm.$options.propsData[key] === undefined &&
     vm._props[key] !== undefined
   ) {
     return vm._props[key]
   }
-  // call factory function for non-Function types
-  // a value is Function if its prototype is function even across different execution context
+  
+  // 如果默认值是工厂函数，且prop的类型没有Function的时候，则直接返回工厂函数的返回值，如果prop的类型有Function的时候，则返回该工厂函数本身
   return typeof def === 'function' && getType(prop.type) !== 'Function'
     ? def.call(vm)
     : def

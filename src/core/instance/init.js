@@ -23,7 +23,7 @@ export function initMixin (Vue: Class<Component>) {
     // 防止Vue实例被observe的标识
     vm._isVue = true
 
-    // 如果当前这个Vue实例是组件（看组件相关源码的时候再详细看，先略过）
+    // 有子组件时，options._isComponnet才为true；
     if (options && options._isComponent) {
       // 初始化组件
       initInternalComponent(vm, options)

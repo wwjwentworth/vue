@@ -48,14 +48,20 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
+  // 初始化Props
   if (opts.props) initProps(vm, opts.props)
+  // 初始化Methods
   if (opts.methods) initMethods(vm, opts.methods)
+  // 如果data存在，直接初始化data
+  // 如果不存在，则新创建一个data
   if (opts.data) {
     initData(vm)
   } else {
     observe(vm._data = {}, true /* asRootData */)
   }
+  // 初始化Computed
   if (opts.computed) initComputed(vm, opts.computed)
+  // 初始化Watch
   if (opts.watch && opts.watch !== nativeWatch) {
     initWatch(vm, opts.watch)
   }
@@ -68,12 +74,13 @@ function initProps (vm: Component, propsOptions: Object) {
   // instead of dynamic object key enumeration.
   const keys = vm.$options._propKeys = []
   const isRoot = !vm.$parent
-  // root instance props should be converted
+  // 如果不是根实例，props属性不需要被观察
   if (!isRoot) {
     toggleObserving(false)
   }
   for (const key in propsOptions) {
     keys.push(key)
+    // 校验Props
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
@@ -97,6 +104,7 @@ function initProps (vm: Component, propsOptions: Object) {
         }
       })
     } else {
+      // 将props上的属性变成响应式
       defineReactive(props, key, value)
     }
     // static props are already proxied on the component's prototype
