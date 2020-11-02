@@ -52,14 +52,16 @@ export function createCompileToFunctionFn (compile: Function): Function {
     const key = options.delimiters
       ? String(options.delimiters) + template
       : template
+    
+    // 缓存，避免重复编译同一个模板
     if (cache[key]) {
       return cache[key]
     }
 
-    // compile
+    // 执行完编译操作之后，会返回ast，render，staticRenderFns三个对象
     const compiled = compile(template, options)
 
-    // check compilation errors/tips
+    // 检查编译是否有报错或者提示
     if (process.env.NODE_ENV !== 'production') {
       if (compiled.errors && compiled.errors.length) {
         if (options.outputSourceRange) {

@@ -14,7 +14,7 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
-// 此处的mount为运行时的mount
+// 先缓存 Vue.prototype.$mount，再重新定义该方法
 const mount = Vue.prototype.$mount
 Vue.prototype.$mount = function (
   el?: string | Element,
@@ -84,6 +84,8 @@ Vue.prototype.$mount = function (
       }
     }
   }
+
+  // 最后再执行被缓存的mount实现组件的挂载
   return mount.call(this, el, hydrating)
 }
 
@@ -101,6 +103,8 @@ function getOuterHTML (el: Element): string {
   }
 }
 
+// 将compileToFunctions暴露给Vue的compile，作为静态方法存在
+// 用户可以自定义配置信息进行模版的编译
 Vue.compile = compileToFunctions
 
 export default Vue

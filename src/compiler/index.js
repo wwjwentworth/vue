@@ -2,7 +2,7 @@
  * @Author: 吴文洁
  * @Date: 2020-06-30 17:53:29
  * @LastEditors: 吴文洁
- * @LastEditTime: 2020-07-13 10:32:05
+ * @LastEditTime: 2020-11-03 07:38:00
  * @Description: 
  * @Copyright: © 2020 杭州杰竞科技有限公司 版权所有
  */ 
@@ -18,11 +18,16 @@ export const createCompiler = createCompilerCreator(function baseCompile (
   template: string,
   options: CompilerOptions
 ): CompiledResult {
+  // 将template转化为AST
   const ast = parse(template.trim(), options)
+  // 优化AST
   if (options.optimize !== false) {
     optimize(ast, options)
   }
+  // 将AST合成代码
   const code = generate(ast, options)
+
+  // 最后生成一个包含AST，render，和staticRenderFns的对象
   return {
     ast,
     render: code.render,
