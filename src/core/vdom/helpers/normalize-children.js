@@ -1,3 +1,11 @@
+/*
+ * @Author: 吴文洁
+ * @Date: 2020-06-30 17:53:29
+ * @LastEditors: 吴文洁
+ * @LastEditTime: 2020-11-04 09:23:39
+ * @Description: 
+ * @Copyright: © 2020 杭州杰竞科技有限公司 版权所有
+ */
 /* @flow */
 
 import VNode, { createTextVNode } from 'core/vdom/vnode'
@@ -10,14 +18,11 @@ import { isFalse, isTrue, isDef, isUndef, isPrimitive } from 'shared/util'
 // generated render function is guaranteed to return Array<VNode>. There are
 // two cases where extra normalization is needed:
 
-// 1. When the children contains components - because a functional component
-// may return an Array instead of a single root. In this case, just a simple
-// normalization is needed - if any child is an Array, we flatten the whole
-// thing with Array.prototype.concat. It is guaranteed to be only 1-level deep
-// because functional components already normalize their own children.
+// 模板编译render函数，理论上template模板通过编译生成的render函数都是vnode类型，但有一个例外，函数式组件生成的children是一个数组，所有需要将children数组拍成一维数组
 export function simpleNormalizeChildren (children: any) {
   for (let i = 0; i < children.length; i++) {
     if (Array.isArray(children[i])) {
+      // 数组降维处理
       return Array.prototype.concat.apply([], children)
     }
   }
@@ -29,6 +34,8 @@ export function simpleNormalizeChildren (children: any) {
 // with hand-written render functions / JSX. In such cases a full normalization
 // is needed to cater to all possible types of children values.
 export function normalizeChildren (children: any): ?Array<VNode> {
+  // 如果节点的类型是字符串的话，那么就直接创建一个文本类型
+  // 如果节点的类型为数组的话，那么就遍历children，对每个节点进行处理
   return isPrimitive(children)
     ? [createTextVNode(children)]
     : Array.isArray(children)
@@ -45,10 +52,11 @@ function normalizeArrayChildren (children: any, nestedIndex?: string): Array<VNo
   let i, c, lastIndex, last
   for (i = 0; i < children.length; i++) {
     c = children[i]
+    // 如果节点为空或者节点的类型为布尔值，直接跳过本次循环
     if (isUndef(c) || typeof c === 'boolean') continue
     lastIndex = res.length - 1
     last = res[lastIndex]
-    //  nested
+    // 如果节点的类型依然还是数组，且数组不为空，那么递归处理该节点
     if (Array.isArray(c)) {
       if (c.length > 0) {
         c = normalizeArrayChildren(c, `${nestedIndex || ''}_${i}`)

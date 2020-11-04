@@ -20,7 +20,9 @@ import {
   simpleNormalizeChildren
 } from './helpers/index'
 
+// 系统内部编译
 const SIMPLE_NORMALIZE = 1
+// 用户手写render编译
 const ALWAYS_NORMALIZE = 2
 
 // wrapper function for providing a more flexible interface
@@ -33,11 +35,14 @@ export function createElement (
   normalizationType: any,
   alwaysNormalize: boolean
 ): VNode | Array<VNode> {
+  // 如果data是数组或者是基本数据类型，那么所有变量的值都取它前面的变量
   if (Array.isArray(data) || isPrimitive(data)) {
     normalizationType = children
     children = data
     data = undefined
   }
+
+  // 根据alwaysNormalize是否为true，区分是内部编译使用的，还是用户手写render使用
   if (isTrue(alwaysNormalize)) {
     normalizationType = ALWAYS_NORMALIZE
   }
@@ -51,6 +56,8 @@ export function _createElement (
   children?: any,
   normalizationType?: number
 ): VNode | Array<VNode> {
+  // 如果data不为空，且data是响应式对象，警告不能使用响应式对象作为vnode
+  // 最后并返回空的虚拟节点
   if (isDef(data) && isDef((data: any).__ob__)) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
@@ -59,15 +66,18 @@ export function _createElement (
     )
     return createEmptyVNode()
   }
+
   // object syntax in v-bind
   if (isDef(data) && isDef(data.is)) {
     tag = data.is
   }
+
+  // 防止动态组件的:is属性设置为false，如果是false的话，则返回空节点
   if (!tag) {
-    // in case of component :is set to falsy value
     return createEmptyVNode()
   }
-  // warn against non-primitive key
+  
+  // 在开发环境中，key值只能为string或者number这些原始数据类型
   if (process.env.NODE_ENV !== 'production' &&
     isDef(data) && isDef(data.key) && !isPrimitive(data.key)
   ) {
@@ -87,12 +97,15 @@ export function _createElement (
     data.scopedSlots = { default: children[0] }
     children.length = 0
   }
+
+  // 不管是系统内部进行的编译，还是通过用户手写的render进行编译，都需要先格式化children
   if (normalizationType === ALWAYS_NORMALIZE) {
     children = normalizeChildren(children)
   } else if (normalizationType === SIMPLE_NORMALIZE) {
     children = simpleNormalizeChildren(children)
   }
   let vnode, ns
+
   if (typeof tag === 'string') {
     let Ctor
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)

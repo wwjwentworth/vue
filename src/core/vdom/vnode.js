@@ -1,5 +1,6 @@
 /* @flow */
 
+// 虚拟DOM构造函数
 export default class VNode {
   tag: string | void;
   data: VNodeData | void;
@@ -71,6 +72,7 @@ export default class VNode {
   }
 }
 
+// 创建注释节点
 export const createEmptyVNode = (text: string = '') => {
   const node = new VNode()
   node.text = text
@@ -78,14 +80,12 @@ export const createEmptyVNode = (text: string = '') => {
   return node
 }
 
+// 创建文本节点
 export function createTextVNode (val: string | number) {
   return new VNode(undefined, undefined, undefined, String(val))
 }
 
-// optimized shallow clone
-// used for static nodes and slot nodes because they may be reused across
-// multiple renders, cloning them avoids errors when DOM manipulations rely
-// on their elm reference.
+// 克隆节点，cloneVNode对vnode只是一层浅拷贝，不对对子节点进行深度克隆
 export function cloneVNode (vnode: VNode): VNode {
   const cloned = new VNode(
     vnode.tag,
@@ -111,7 +111,3 @@ export function cloneVNode (vnode: VNode): VNode {
   cloned.isCloned = true
   return cloned
 }
-
-
-老爸：360428197510023117
-老妈：360428197804033126

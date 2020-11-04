@@ -16,7 +16,9 @@ import VNode, { createEmptyVNode } from '../vdom/vnode'
 
 import { isUpdatingChildComponent } from './lifecycle'
 
+// 定义渲染函数
 export function initRender (vm: Component) {
+  
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null // v-once cached trees
   const options = vm.$options

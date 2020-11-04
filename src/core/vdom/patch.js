@@ -30,6 +30,7 @@ import {
 
 export const emptyNode = new VNode('', {}, [])
 
+// 生命周期钩子函数
 const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 
 function sameVnode (a, b) {
@@ -75,7 +76,11 @@ export function createPatchFunction (backend) {
 
   for (i = 0; i < hooks.length; ++i) {
     cbs[hooks[i]] = []
+    /**
+     * cabs = { 'create': [] }
+     */
     for (j = 0; j < modules.length; ++j) {
+      // 收集生命周期钩子函数
       if (isDef(modules[j][hooks[i]])) {
         cbs[hooks[i]].push(modules[j][hooks[i]])
       }

@@ -57,18 +57,17 @@ export function initLifecycle (vm: Component) {
 
 export function lifecycleMixin (Vue: Class<Component>) {
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
-    const vm: Component = this
+    const vm: Component = this // vm实例
     const prevEl = vm.$el
-    const prevVnode = vm._vnode
+    const prevVnode = vm._vnode // prevVnode为旧的节点
     const restoreActiveInstance = setActiveInstance(vm)
     vm._vnode = vnode
-    // Vue.prototype.__patch__ is injected in entry points
-    // based on the rendering backend used.
+  
+    // 通过是否有旧节点来判断是初次渲染还是更新
+    // 如果没有旧节点，那么就是初次渲染，否则就是更新
     if (!prevVnode) {
-      // initial render
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
-      // updates
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
     restoreActiveInstance()
