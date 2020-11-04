@@ -4,7 +4,7 @@
  * @Author: 吴文洁
  * @Date: 2020-06-30 17:53:29
  * @LastEditors: 吴文洁
- * @LastEditTime: 2020-06-30 18:32:50
+ * @LastEditTime: 2020-11-04 21:59:31
  * @Description: 
  */ 
 
@@ -26,6 +26,7 @@ import {
   defineReactive
 } from '../util/index'
 
+// 初始化全局API
 export function initGlobalAPI (Vue: GlobalAPI) {
   // 定一个configDef对象
   const configDef = {}
@@ -74,8 +75,9 @@ export function initGlobalAPI (Vue: GlobalAPI) {
 
   extend(Vue.options.components, builtInComponents)
 
-  initUse(Vue)
-  initMixin(Vue)
-  initExtend(Vue)
-  initAssetRegisters(Vue)
+  initUse(Vue) // 初始化Use
+  initMixin(Vue) // 初始化Mixin
+  initExtend(Vue) // 初始化Extend
+  
+  initAssetRegisters(Vue) // 初始化静态方法
 }
