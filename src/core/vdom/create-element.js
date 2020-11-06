@@ -109,6 +109,7 @@ export function _createElement (
   if (typeof tag === 'string') {
     let Ctor
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
+    // 如果子节点为普通的html标签，则直接创建一个vnode
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       if (process.env.NODE_ENV !== 'production' && isDef(data) && isDef(data.nativeOn)) {
@@ -122,7 +123,9 @@ export function _createElement (
         undefined, undefined, context
       )
     } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
-      // component
+      // 如果子节点是已经全局注册过的组件名，那么就创建一个组件
+      // 判断是否是全局注册的组件，只需要看resolveAsset是否有返回值
+      // 拿到注册过的子类构造器之后，就可以调用createComponent来创建子组件vnode
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {
       // unknown or unlisted namespaced elements
