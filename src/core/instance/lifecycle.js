@@ -34,6 +34,8 @@ export function initLifecycle (vm: Component) {
 
   // locate first non-abstract parent
   let parent = options.parent
+  // 如果是子组件，并且子组件不是抽象组件，且父组件是抽象组件，就一直往上找，找到第一个不是抽象组件的父组件，最后将子组件实例本身添加到父组件的parent.$children属性中
+  // 抽象组件不会出现在父子级路径上，也不会参与DOM渲染
   if (parent && !options.abstract) {
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
@@ -41,6 +43,7 @@ export function initLifecycle (vm: Component) {
     parent.$children.push(vm)
   }
 
+  // 将该子组件的第一个非抽象父组件添加到实例的$parent属性中
   vm.$parent = parent
   vm.$root = parent ? parent.$root : vm
 
@@ -50,9 +53,13 @@ export function initLifecycle (vm: Component) {
   vm._watcher = null
   vm._inactive = null
   vm._directInactive = false
+  // 该实例是否已经被挂载
   vm._isMounted = false
+  // 该实例是否已经被销毁
   vm._isDestroyed = false
+  // 该是否是否吧已经正在销毁
   vm._isBeingDestroyed = false
+
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
