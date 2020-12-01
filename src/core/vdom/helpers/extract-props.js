@@ -1,4 +1,12 @@
 /* @flow */
+/*
+ * @Author: 吴文洁
+ * @Date: 2020-06-30 17:53:29
+ * @LastEditors: 吴文洁
+ * @LastEditTime: 2020-11-13 21:55:26
+ * @Description: 
+ * @Copyright: © 2020 杭州杰竞科技有限公司 版权所有
+ */
 
 import {
   tip,
@@ -14,14 +22,15 @@ export function extractPropsFromVNodeData (
   Ctor: Class<Component>,
   tag?: string
 ): ?Object {
-  // we are only extracting raw values here.
-  // validation and default values are handled in the child
-  // component itself.
+  // 如果子组件的props属性为空的话，直接返回
   const propOptions = Ctor.options.props
   if (isUndef(propOptions)) {
     return
   }
+
   const res = {}
+  // data.attrs针对编译生成的render函数
+  // data.props针对用户自定义的render函数
   const { attrs, props } = data
   if (isDef(attrs) || isDef(props)) {
     for (const key in propOptions) {

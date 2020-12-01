@@ -119,6 +119,7 @@ export function createComponent (
    * 1. 局部注册添加的对象配置是在某个组件下面，而全局注册添加的子组件是在根实例下面
    * 2. 局部注册添加的是一个对象，而全局注册添加的是一个构造器
    */
+  // 工厂函数的用法使得Vue.component(name, options)的第二个参数不会是对象，因此不论是全局还是局部注册的组件，Vue.extend都不会被执行，所以Ctor.id会不存在
   if (isObject(Ctor)) {
     Ctor = baseCtor.extend(Ctor)
   }
@@ -131,10 +132,11 @@ export function createComponent (
     return
   }
 
-  // async component
+  // 异步组件
   let asyncFactory
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
+    // 创建异步工厂函数
     Ctor = resolveAsyncComponent(asyncFactory, baseCtor)
     if (Ctor === undefined) {
       // return a placeholder node for async component, which is rendered
@@ -163,7 +165,7 @@ export function createComponent (
   // extract props
   const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
-  // functional component
+  // 函数式组件
   if (isTrue(Ctor.options.functional)) {
     return createFunctionalComponent(Ctor, propsData, data, context, children)
   }

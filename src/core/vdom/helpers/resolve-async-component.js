@@ -88,18 +88,21 @@ export function resolveAsyncComponent (
       }
     }
 
+    // 异步请求成功处理
     const resolve = once((res: Object | Class<Component>) => {
-      // cache resolved
+      // 转成组件构造器，并缓存到factory.resolved中
       factory.resolved = ensureCtor(res, baseCtor)
-      // invoke callbacks only if this is not a synchronous resolve
-      // (async resolves are shimmed as synchronous during SSR)
+      // 如果不是异步的话，强制更新视图
+      // (在SSR期间将异步解析填充为同步)
       if (!sync) {
+        // 强制更新视图
         forceRender(true)
       } else {
         owners.length = 0
       }
     })
 
+    // 异步请求失败处理
     const reject = once(reason => {
       process.env.NODE_ENV !== 'production' && warn(
         `Failed to resolve async component: ${String(factory)}` +
@@ -111,6 +114,7 @@ export function resolveAsyncComponent (
       }
     })
 
+    // 创建子组件会先执行工厂函数，并将resolve和reject传入
     const res = factory(resolve, reject)
 
     if (isObject(res)) {
