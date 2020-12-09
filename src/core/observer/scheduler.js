@@ -50,7 +50,13 @@ if (inBrowser && !isIE) {
   }
 }
 
-// 刷新队列并执行watcher
+// 刷新队列并执行watcher，该阶段主要做了以下几件事情
+/**
+ * 对queue中的watcher进行排序
+ * 遍历watcher，如果watcher有before配置，则执行before方法，对应实例挂载之前的Watcher；在渲染watcher实例化的时候，我们传递了before函数，即在下一个tick更新之前，会调用beforeUpdate生命周期钩子函数
+ * 执行run方法
+ * 重置恢复状态，清空队列
+ */
 function flushSchedulerQueue () {
   // 获取当前时间戳
   currentFlushTimestamp = getNow()
@@ -95,7 +101,7 @@ function flushSchedulerQueue () {
   // keep copies of post queues before resetting state
   const activatedQueue = activatedChildren.slice()
   const updatedQueue = queue.slice()
-
+  // 重置恢复状态，清空队列
   resetSchedulerState()
 
   // call component updated and activated hooks
@@ -119,7 +125,6 @@ function callUpdatedHooks (queue) {
     }
   }
 }
-
 
 export function queueActivatedComponent (vm: Component) {
   vm._inactive = false

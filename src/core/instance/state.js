@@ -119,9 +119,11 @@ function initProps (vm: Component, propsOptions: Object) {
 
 function initData (vm: Component) {
   let data = vm.$options.data
+  // 根实例的data是个对象，子组件的data是个函数
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
+  // 如果data不是对象，那么将data重置为一个空对象
   if (!isPlainObject(data)) {
     data = {}
     process.env.NODE_ENV !== 'production' && warn(
@@ -137,6 +139,7 @@ function initData (vm: Component) {
   let i = keys.length
   while (i--) {
     const key = keys[i]
+    // 命名不能和方法重复
     if (process.env.NODE_ENV !== 'production') {
       if (methods && hasOwn(methods, key)) {
         warn(
@@ -145,6 +148,7 @@ function initData (vm: Component) {
         )
       }
     }
+    // 命名不能和porps属性重复
     if (props && hasOwn(props, key)) {
       process.env.NODE_ENV !== 'production' && warn(
         `The data property "${key}" is already declared as a prop. ` +
@@ -152,11 +156,12 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(key)) {
+      // 数据代理，用户可以之际通过vm.key访问到data中的属性
       proxy(vm, `_data`, key)
     }
   }
-  // observe data
-  observe(data, true /* asRootData */)
+  // 将data对象标记为响应式对象
+  observe(data, true)
 }
 
 export function getData (data: Function, vm: Component): any {
@@ -175,6 +180,7 @@ export function getData (data: Function, vm: Component): any {
 const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
+  // 声明一个watcher实例，用来监听Computed中的属性
   const watchers = vm._computedWatchers = Object.create(null)
   // computed properties are just getters during SSR
   const isSSR = isServerRendering()
@@ -190,7 +196,7 @@ function initComputed (vm: Component, computed: Object) {
     }
 
     if (!isSSR) {
-      // create internal watcher for the computed property.
+      // 为computed创建watcher
       watchers[key] = new Watcher(
         vm,
         getter || noop,
@@ -199,12 +205,11 @@ function initComputed (vm: Component, computed: Object) {
       )
     }
 
-    // component-defined computed properties are already defined on the
-    // component prototype. We only need to define computed properties defined
-    // at instantiation here.
     if (!(key in vm)) {
+      // 设置为响应数据
       defineComputed(vm, key, userDef)
     } else if (process.env.NODE_ENV !== 'production') {
+      // 不能和data，props重名
       if (key in vm.$data) {
         warn(`The computed property "${key}" is already defined in data.`, vm)
       } else if (vm.$options.props && key in vm.$options.props) {

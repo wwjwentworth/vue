@@ -41,13 +41,12 @@ export class Observer {
     // 将自身添加到value对象的__ob__属性上
     def(value, '__ob__', this)
 
-    // 如果被监听的对象是个数组
+    // 处理数组
     if (Array.isArray(value)) {
       // 如果数组有__proto__属性，那么将数组的__proto__属性指向Array.prototype对象
       if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {
-        // 否则将
         copyAugment(value, arrayMethods, arrayKeys)
       }
       // 观察数组
@@ -133,9 +132,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
   return ob
 }
 
-/**
- * Define a reactive property on an Object.
- */
+// 给对象的属性添加一个响应式属性
 export function defineReactive (
   obj: Object,
   key: string,
@@ -163,7 +160,7 @@ export function defineReactive (
     val = obj[key]
   }
 
-  // 获取值的观察者实例对象
+  // 这一部分逻辑是针对深层次对象，如果对象的属性是一个对象，那么就会递归遍历对象，让其属性值也转化为响应式对象
   let childOb = !shallow && observe(val)
 
   Object.defineProperty(obj, key, {
@@ -173,7 +170,7 @@ export function defineReactive (
       const value = getter ? getter.call(obj) : val
       // 如果有Watcher存在
       if (Dep.target) {
-        // 添加订阅者
+        // 为当前watcher添加订阅者
         dep.depend()
         if (childOb) {
           // 为属性值添加订阅者
