@@ -177,6 +177,7 @@ export function getData (data: Function, vm: Component): any {
   }
 }
 
+// { lazy: true }是computed watcher的标志
 const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
@@ -224,8 +225,12 @@ export function defineComputed (
   key: string,
   userDef: Object | Function
 ) {
+  // 是否需要缓存，非服务端渲染下需要缓存，缓存的意义在于只有在相关响应数据发生改变的时候才会重新计算，其余清空多次请求该数据会返回缓存的计算结果
   const shouldCache = !isServerRendering()
+
+  // computed有两种写法，一种是function，一种是对象，对象需要提供getter和setter方法
   if (typeof userDef === 'function') {
+    // 当访问到computed，会触发getter方法，从而进行依赖的收集，详细看createComputedGetter方法
     sharedPropertyDefinition.get = shouldCache
       ? createComputedGetter(key)
       : createGetterInvoker(userDef)
@@ -251,6 +256,7 @@ export function defineComputed (
 }
 
 function createComputedGetter (key) {
+  // 返回的函数中会先拿到computed的watcher，watcher.dirty属性表示是否已经计算过，如果已经计算过的话，那么就调用evaluate方法重复计算，这就是缓存的原理
   return function computedGetter () {
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
