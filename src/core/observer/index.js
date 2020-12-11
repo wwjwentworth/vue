@@ -214,10 +214,11 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
   // 如果被观察的数据是数组，且数组的下标是合法的话，那么更新数组长度，并且将val插入到数组中
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
+    // 利用重写后的splice的方法对新增元素进行依赖的收集
     target.splice(key, 1, val)
     return val
   }
-  // 如何key已经在被观察的对象中，则重新赋值并且返回val
+  // 如果key已经在被观察的对象中，则重新赋值并且返回val
   if (key in target && !(key in Object.prototype)) {
     target[key] = val
     return val
@@ -232,6 +233,8 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     )
     return val
   }
+
+  // 目标不是一个响应式对象，则不需要处理
   if (!ob) {
     target[key] = val
     return val
