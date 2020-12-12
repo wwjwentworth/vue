@@ -1,3 +1,11 @@
+/*
+ * @Author: 吴文洁
+ * @Date: 2020-06-30 17:53:29
+ * @LastEditors: 吴文洁
+ * @LastEditTime: 2020-12-12 09:12:25
+ * @Description: 
+ * @Copyright: © 2020 杭州杰竞科技有限公司 版权所有
+ */
 /* @flow */
 /* globals MutationObserver */
 
@@ -73,11 +81,14 @@ export function nextTick (cb?: Function, ctx?: Object) {
       _resolve(ctx)
     }
   })
+  // pending是等待微任务执行的标志
   if (!pending) {
     pending = true
+    // 将维护的队列推动微任务队列中进行维护
     timerFunc()
   }
-  // $flow-disable-line
+  // 如果nextTick不传递任何参数，则可以作为一个promise使用
+  // nextTick().then(() => {})
   if (!cb && typeof Promise !== 'undefined') {
     return new Promise(resolve => {
       _resolve = resolve
