@@ -305,9 +305,11 @@ function initMethods (vm: Component, methods: Object) {
   }
 }
 
+// 初始化watch就是创建一个watcher
 function initWatch (vm: Component, watch: Object) {
   for (const key in watch) {
     const handler = watch[key]
+    // handler可以是数组形式，执行多个回调
     if (Array.isArray(handler)) {
       for (let i = 0; i < handler.length; i++) {
         createWatcher(vm, key, handler[i])
@@ -319,11 +321,12 @@ function initWatch (vm: Component, watch: Object) {
 }
 
 function createWatcher (
-  vm: Component,
-  expOrFn: string | Function,
-  handler: any,
-  options?: Object
+  vm: Component, // vue实例
+  expOrFn: string | Function, // 监听的字符串
+  handler: any, // 回调函数
+  options?: Object // 相关配置
 ) {
+  // 如果handler是对象形式，
   if (isPlainObject(handler)) {
     options = handler
     handler = handler.handler
@@ -370,8 +373,11 @@ export function stateMixin (Vue: Class<Component>) {
       return createWatcher(vm, expOrFn, cb, options)
     }
     options = options || {}
+    // options.user为true是当前用户自定义的标志
     options.user = true
+    // 在实例化的时候，会进行一次getter求值，这个时候，user wather会作为依赖被数据收集
     const watcher = new Watcher(vm, expOrFn, cb, options)
+    // 如果有immediate属性，那么会立即执行回调函数
     if (options.immediate) {
       try {
         cb.call(vm, watcher.value)
