@@ -2,7 +2,7 @@
  * @Author: 吴文洁
  * @Date: 2020-06-30 17:53:29
  * @LastEditors: 吴文洁
- * @LastEditTime: 2020-11-03 07:38:00
+ * @LastEditTime: 2020-12-13 19:08:07
  * @Description: 
  * @Copyright: © 2020 杭州杰竞科技有限公司 版权所有
  */ 
@@ -13,7 +13,7 @@ import { optimize } from './optimizer'
 import { generate } from './codegen/index'
 import { createCompilerCreator } from './create-compiler'
 
-// createCompiler函数主要通过三个步骤，parse、optimize、generate来生成一个包含ast、render和staticRenderFns的对象
+// baseCompile函数主要通过三个步骤，parse、optimize、generate来生成一个包含ast、render和staticRenderFns的对象
 export const createCompiler = createCompilerCreator(function baseCompile (
   template: string,
   options: CompilerOptions
