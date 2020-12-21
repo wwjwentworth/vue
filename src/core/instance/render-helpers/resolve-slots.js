@@ -2,13 +2,11 @@
 
 import type VNode from 'core/vdom/vnode'
 
-/**
- * Runtime helper for resolving raw children VNodes into a slot object.
- */
 export function resolveSlots (
   children: ?Array<VNode>,
   context: ?Component
 ): { [key: string]: Array<VNode> } {
+  // children是父组件需要分发到子组件的vnode节点，如果children不存在，则没有分发内容
   if (!children || !children.length) {
     return {}
   }

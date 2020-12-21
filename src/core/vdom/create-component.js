@@ -35,6 +35,7 @@ import {
 // 组件内部自带的钩子
 const componentVNodeHooks = {
   init (vnode: VNodeWithData, hydrating: boolean): ?boolean {
+    // 第一次执行很明显没有componentInstance属性，vnode.data.keepAlive也为false，所以第一次执行init的时候会先走else分支，调用createComponentInstanceForVnode函数进行组件实例化，并将结果赋值给vnode.componentInstance，最终执行组件实例的$mount方法
     if (
       vnode.componentInstance &&
       !vnode.componentInstance._isDestroyed &&
@@ -96,7 +97,7 @@ const componentVNodeHooks = {
   }
 }
 
-const hooksToMerge = Object.keys(componentVNodeHooks)
+const componentVNodeHooks = Object.keys(componentVNodeHooks)
 
 export function createComponent (
   // 子构造器

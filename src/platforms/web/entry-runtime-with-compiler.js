@@ -8,6 +8,7 @@ import Vue from './runtime/index'
 import { query } from './util/index'
 import { compileToFunctions } from './compiler/index'
 import { shouldDecodeNewlines, shouldDecodeNewlinesForHref } from './util/compat'
+import { fchown } from 'fs'
 
 const idToTemplate = cached(id => {
   const el = query(id)
@@ -74,6 +75,7 @@ Vue.prototype.$mount = function (
         delimiters: options.delimiters,
         comments: options.comments
       }, this)
+
       options.render = render
       options.staticRenderFns = staticRenderFns
 

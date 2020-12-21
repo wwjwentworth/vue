@@ -76,10 +76,10 @@ export function parseHTML (html, options) {
           if (commentEnd >= 0) {
             // 如果需要保留注释的话
             if (options.shouldKeepComment) {
-              // 调用传进来的comment的方法
+              // 调用传进来的comment的方法，添加一个注释节点
               options.comment(html.substring(4, commentEnd), index, index + commentEnd + 3)
             }
-            // advance方法就是截取字符串
+            // advance方法就是截取字符串，将已经解析过的字符串截取掉
             advance(commentEnd + 3)
             continue
           }
@@ -263,6 +263,7 @@ export function parseHTML (html, options) {
     }
   }
 
+  // 解析结束标签
   function parseEndTag (tagName, start, end) {
     let pos, lowerCasedTagName
     if (start == null) start = index
@@ -312,6 +313,6 @@ export function parseHTML (html, options) {
       if (options.end) {
         options.end(tagName, start, end)
       }
-    }
+    } 
   }
 }

@@ -215,15 +215,20 @@ export function createPatchFunction (backend) {
   function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
     let i = vnode.data
     if (isDef(i)) {
+      // vnode.componentInstance 组件是否已经被实例化了
+      // i.keepAlive = vnode.data.keepAlive 组件是否被缓存了
       const isReactivated = isDef(vnode.componentInstance) && i.keepAlive
+      // 如果vnode.data.hook和vnode.data.init都存在，执行组件的初始化操作
       if (isDef(i = i.hook) && isDef(i = i.init)) {
+        // 执行组件初始化的内部钩子init
         i(vnode, false /* hydrating */)
       }
-      // after calling the init hook, if the vnode is a child component
-      // it should've created a child instance and mounted it. the child
-      // component also has set the placeholder vnode's elm.
-      // in that case we can just return the element and be done.
+      // 调用init钩子之后，如果vnode是子组件，应该创建一个子组件并挂载它.
+      // 子组件也设置了一个占位符vnode的ele，这种情况下我们只需要返回这个占位符就完事了
+
+      // 如果组件已经实例化了
       if (isDef(vnode.componentInstance)) {
+        // 其中一个作用是将真实的dom保留到vnode中
         initComponent(vnode, insertedVnodeQueue)
         insert(parentElm, vnode.elm, refElm)
         if (isTrue(isReactivated)) {
@@ -239,6 +244,7 @@ export function createPatchFunction (backend) {
       insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
       vnode.data.pendingInsert = null
     }
+    // 保留真实的dom到vnode中
     vnode.elm = vnode.componentInstance.$el
     if (isPatchable(vnode)) {
       invokeCreateHooks(vnode, insertedVnodeQueue)

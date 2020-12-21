@@ -21,7 +21,7 @@ import {
   getAndRemoveAttrByRegex
 } from '../helpers'
 
-// 事件正则（@click v-onclick）
+// 事件正则（@click v-on:click）
 export const onRE = /^@|^v-on:/
 // 指令正则（directive）
 export const dirRE = process.env.VBIND_PROP_SHORTHAND
@@ -104,6 +104,7 @@ export function parse (
   // 表示模板上包裹表达式的开始和结束字符，分别是{{ 和 }}
   delimiters = options.delimiters
 
+  // 构建一个栈，用来维护开始标签和闭合标签
   const stack = []
   const preserveWhitespace = options.preserveWhitespace !== false
   const whitespaceOption = options.whitespace
@@ -228,8 +229,6 @@ export function parse (
     // 最后更新 root、currentParent、stack 的结果
     // 最终通过 createASTElement 方法定义了一个新的 AST 对象:
     start (tag, attrs, unary, start, end) {
-      // check namespace.
-      // inherit parent ns if there is one
       const ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag)
 
       // handle IE svg bug
@@ -248,7 +247,7 @@ export function parse (
         if (options.outputSourceRange) {
           element.start = start
           element.end = end
-          // 将attrsList数组转化为  对象，key就是属性名称
+          // 将attrsList数组转化为对象，key就是属性名称
           element.rawAttrsMap = element.attrsList.reduce((cumulated, attr) => {
             cumulated[attr.name] = attr
             return cumulated
