@@ -111,8 +111,6 @@ export default {
       const { cache, keys } = this
       // 如果子组件的key不存在的，生成一个key，存在就用用户定义的key
       const key: ?string = vnode.key == null
-        // same constructor may get registered as different local components
-        // so cid alone is not enough (#3269)
         ? componentOptions.Ctor.cid + (componentOptions.tag ? `::${componentOptions.tag}` : '')
         : vnode.key
       // 如果命中缓存
@@ -126,7 +124,6 @@ export default {
         // 如果没有命中缓存，那么将vnode赋值给cache[key]
         cache[key] = vnode
         keys.push(key)
-        // prune oldest entry
         if (this.max && keys.length > parseInt(this.max)) {
           pruneCacheEntry(cache, keys[0], keys, this._vnode)
         }
