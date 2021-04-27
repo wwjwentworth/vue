@@ -73,9 +73,11 @@ export function initInternalComponent (vm: Component, options: InternalComponent
   opts.parent = options.parent
   opts._parentVnode = parentVnode
 
+  // 为子node记录相关信息
   const vnodeComponentOptions = parentVnode.componentOptions
   opts.propsData = vnodeComponentOptions.propsData
   opts._parentListeners = vnodeComponentOptions.listeners
+  // 父组件需要分发的内容赋值给了子组件的_renderChildren
   opts._renderChildren = vnodeComponentOptions.children
   opts._componentTag = vnodeComponentOptions.tag
 

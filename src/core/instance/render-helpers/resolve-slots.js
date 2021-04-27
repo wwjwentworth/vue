@@ -1,3 +1,11 @@
+/*
+ * @Author: 吴文洁
+ * @Date: 2020-06-30 17:53:29
+ * @LastEditors: 吴文洁
+ * @LastEditTime: 2021-04-27 17:26:21
+ * @Description: 
+ * @Copyright: © 2021 上海微盟科技有限公司 版权所有
+ */
 /* @flow */
 
 import type VNode from 'core/vdom/vnode'
@@ -14,16 +22,17 @@ export function resolveSlots (
   for (let i = 0, l = children.length; i < l; i++) {
     const child = children[i]
     const data = child.data
-    // remove slot attribute if the node is resolved as a Vue slot node
+    // 如果结点已经被解析为了slot，那么删除节点上的slot属性
     if (data && data.attrs && data.attrs.slot) {
       delete data.attrs.slot
     }
-    // named slots should only be respected if the vnode was rendered in the
-    // same context.
+    
+    // 具名slot分支
     if ((child.context === context || child.fnContext === context) &&
       data && data.slot != null
     ) {
       const name = data.slot
+      // 将name相同的slot进行归类
       const slot = (slots[name] || (slots[name] = []))
       if (child.tag === 'template') {
         slot.push.apply(slot, child.children || [])
@@ -31,6 +40,7 @@ export function resolveSlots (
         slot.push(child)
       }
     } else {
+      // 匿名slot，核心逻辑是构造{ default: [children] }对象返回
       (slots.default || (slots.default = [])).push(child)
     }
   }

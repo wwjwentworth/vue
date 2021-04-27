@@ -1,3 +1,11 @@
+/*
+ * @Author: 吴文洁
+ * @Date: 2020-06-30 17:53:29
+ * @LastEditors: 吴文洁
+ * @LastEditTime: 2021-04-27 17:20:05
+ * @Description: 
+ * @Copyright: © 2021 上海微盟科技有限公司 版权所有
+ */
 /* @flow */
 
 import { extend, warn, isObject } from 'core/util/index'
@@ -7,10 +15,11 @@ import { extend, warn, isObject } from 'core/util/index'
  */
 export function renderSlot (
   name: string,
-  fallback: ?Array<VNode>,
+  fallback: ?Array<VNode>, // fallback为后备内容
   props: ?Object,
   bindObject: ?Object
 ): ?Array<VNode> {
+  // 作用域slot
   const scopedSlotFn = this.$scopedSlots[name]
   let nodes
   if (scopedSlotFn) { // scoped slot
@@ -26,6 +35,7 @@ export function renderSlot (
     }
     nodes = scopedSlotFn(props) || fallback
   } else {
+    // 如果没有父组件没有slot，那么子组件的slot将会渲染为后备内容
     nodes = this.$slots[name] || fallback
   }
 

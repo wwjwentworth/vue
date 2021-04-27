@@ -1,3 +1,11 @@
+/*
+ * @Author: 吴文洁
+ * @Date: 2020-06-30 17:53:29
+ * @LastEditors: 吴文洁
+ * @LastEditTime: 2021-04-27 17:30:53
+ * @Description: 
+ * @Copyright: © 2021 上海微盟科技有限公司 版权所有
+ */
 /* @flow */
 
 import { def } from 'core/util/lang'
@@ -5,11 +13,12 @@ import { normalizeChildren } from 'core/vdom/helpers/normalize-children'
 import { emptyObject } from 'shared/util'
 
 export function normalizeScopedSlots (
-  slots: { [key: string]: Function } | void,
-  normalSlots: { [key: string]: Array<VNode> },
-  prevSlots?: { [key: string]: Function } | void
+  slots: { [key: string]: Function } | void, // _parentVnode.data.scopedSlots,
+  normalSlots: { [key: string]: Array<VNode> }, //  vm.$slots,
+  prevSlots?: { [key: string]: Function } | void // vm.$scopedSlots
 ): any {
   let res
+  // 是否有默认的slots
   const hasNormalSlots = Object.keys(normalSlots).length > 0
   const isStable = slots ? !!slots.$stable : !hasNormalSlots
   const key = slots && slots.$key
